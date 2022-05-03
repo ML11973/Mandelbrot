@@ -1,0 +1,17 @@
+{
+    "author": {
+        "name": "Laurent Gantel",
+        "email": "<laurent.gantel@hesge.ch>"
+    },
+    "project": {
+        "name": "uart_module",
+        "type": "COMP_PRJ_TYPE",
+        "category": "PACKAGES",
+        "vivado_version": "2019.2",
+        "target_language": "SystemVerilog"
+    },
+    "hardware": {
+        "part_name": "xc7z020clg484-1",
+        "board_name": "em.avnet.com:zed:part0:1.4"
+    }
+}

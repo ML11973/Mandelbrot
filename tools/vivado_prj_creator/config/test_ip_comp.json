@@ -1,0 +1,26 @@
+{
+    "author": {
+        "name": "Laurent Gantel",
+        "email": "<laurent.gantel@hesge.ch>"
+    },
+    "project": {
+        "name": "axis_uart",
+        "type": "COMP_PRJ_TYPE",
+        "category": "IPS",
+        "vivado_version": "2021.1",
+        "target_language": "VHDL"
+    },
+    "hardware": {
+        "part_name": "xczu7ev-ffvc1156-2-e",
+        "board_name": "xilinx.com:zcu104:part0:1.1"
+    },
+    "sim_components": {
+        "packages": {
+            "uart_pkg": {
+                "enable": "true",
+                "library_name": "uart_pkg",
+                "import_src": "enable"
+            }
+        }
+    }
+}

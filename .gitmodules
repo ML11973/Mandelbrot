@@ -1,0 +1,3 @@
+[submodule "tools/vivado_prj_creator"]
+	path = tools/vivado_prj_creator
+	url = ssh://git@ssh.hesge.ch:10572/laurent.gantel/vivado_prj_creator.git

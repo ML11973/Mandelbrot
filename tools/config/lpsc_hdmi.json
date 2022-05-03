@@ -1,0 +1,38 @@
+{
+    "author" : {
+        "name"  : "Joachim Schmidt",
+        "email" : "<joachim.schmidt@hesge.ch"
+    },
+    "project" : {
+        "name"            : "lpsc_hdmi",
+        "type"            : "COMP_PRJ_TYPE",
+        "category"        : "IPS",
+        "vivado_version"  : "2021.2",
+        "target_language" : "VHDL",
+        "vhdl_version"    : "VHDL 2008"
+    },
+    "hardware" : {
+        "part_name"  : "xc7a200tsbg484-1",
+        "board_name": "digilentinc.com:nexys_video:part0:1.1"
+    },
+    "components" : {
+        "packages" : {
+            "lpsc_hdmi_interface_pkg" :
+            {
+                "enable": "true",
+                "library_name": "lpsc_lib"
+            }
+        },
+        "ips" : {
+            "lpsc_hdmi" : {
+                "hdl" : "enable",
+                "xci" : {
+                    "clk_vga_hdmi_640x480" : "enable",
+                    "clk_vga_hdmi_800x600" : "enable",
+                    "clk_vga_hdmi_1024x600" : "enable",
+                    "clk_vga_hdmi_1024x768" : "enable"
+                }
+            }
+        }        
+    }
+}

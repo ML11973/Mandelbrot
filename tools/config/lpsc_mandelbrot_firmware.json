@@ -1,0 +1,59 @@
+{
+    "author" : {
+        "name"  : "Joachim Schmidt",
+        "email" : "<joachim.schmidt@hesge.ch"
+    },
+    "project" : {
+        "name"            : "lpsc_mandelbrot_firmware",
+        "type"            : "DESIGN_PRJ_TYPE",
+        "category"        : "DESIGNS",
+        "vivado_version"  : "2021.2",
+        "target_language" : "VHDL",
+        "vhdl_version"    : "VHDL 2008"
+    },
+    "hardware" : {
+        "part_name"  : "xc7a200tsbg484-1",
+        "board_name": "digilentinc.com:nexys_video:part0:1.1"
+    },
+    "constraints" : {
+        "lpsc_mandelbrot_firmware" : "enable",
+        "lpsc_mandelbrot_debug" : "enable"
+    },
+    "components" : {
+        "packages" : {
+            "lpsc_hdmi_interface_pkg" :
+            {
+                "enable": "true",
+                "library_name": "lpsc_lib"
+            }
+        },
+        "ips" : {
+            "lpsc_hdmi" : {
+                "hdl" : "enable",
+                "xci" : {
+                    "clk_vga_hdmi_640x480" : "enable",
+                    "clk_vga_hdmi_800x600" : "enable",
+                    "clk_vga_hdmi_1024x600" : "enable",
+                    "clk_vga_hdmi_1024x768" : "enable"
+                }
+            },
+            "lpsc_image_generator" : {
+                "hdl" : "enable",
+                "xci" : {
+                }
+            },
+            "lpsc_bram_video_memory" : {
+                "hdl" : "disable",
+                "xci" : {
+                    "bram_video_memory_wauto_dauto_rdclk1_wrclk1" : "disable"
+                }
+            },
+            "lpsc_clk_mandelbrot" : {
+                "hdl" : "disable",
+                "xci" : {
+                    "clk_mandelbrot" : "enable"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,65 @@
+{
+    "config": {
+        "templates_path": "."
+    },
+    "author": {
+        "name": "Laurent Gantel",
+        "email": "<laurent.gantel@hesge.ch>"
+    },
+    "project": {
+        "name": "test_design",
+        "type": "DESIGN_PRJ_TYPE",
+        "category": "DESIGNS",
+        "vivado_version": "2019.2",
+        "target_language": "VHDL"
+    },
+    "hardware": {
+        "part_name": "xc7z020clg484-1",
+        "board_name": "em.avnet.com:zed:part0:1.4"
+    },
+    "components" : {
+        "packages" : {
+            "aurora_drp_pkg": {
+                "enable": "true",
+                "library_name": "aurora_lib"
+            },
+            "aurora_status_pkg": {
+                "enable": "true",
+                "library_name": "aurora_lib"
+            },
+            "axi4_pkg": {
+                "enable": "false",
+                "vhdl_version": "VHDL 2008"
+            }
+        },
+        "soc" : {
+            "scalp_zynqps" : "enable"
+        },
+        "ips" : {
+            "uart_module_0" : {
+                "hdl" : "enable",
+                "xci" : {
+                    "uart_fifo" : "enable"
+                }
+            }
+        }
+    },
+    "sim_components": {
+        "packages": {
+            "logger_pkg": {
+                "enable": "true"
+            }
+        }
+    },
+    "constraints" : {
+      "test_design_constrs_synth" : "enable",
+      "test_design_constrs_impl"  : "enable"
+    },
+    "software" : {
+      "default_project" : {
+          "proc_name" : "ps7_cortexa9_0",
+          "os_name" : "standalone",
+          "template_name" : "Empty Application"
+      }
+    }
+}
