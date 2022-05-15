@@ -8,7 +8,7 @@ ghdl -a ../src/zc_adder.vhd
 
 # Analyze TB
 ghdl -a -fsynopsys zc_adder_tb.vhd
-ghdl -a zc_adder_tb.vhd
+#ghdl -a zc_adder_tb.vhd
 
 # Generate exe
 ghdl -e zc_adder_tb

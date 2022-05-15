@@ -55,14 +55,14 @@ architecture tb of zc_adder_tb is
     -- Clock period
     constant PERIOD : time := 10 ns;
 
-    signal clk_s : std_logic := '0';
+    signal clk_s   : std_logic := '0';
     signal reset_s : std_logic := '0';
 
 
     -- Simulation flags
     signal sim_over_s : boolean   := false;
-    signal sti_ok_s : std_logic := '0';
-    signal err_s    : std_logic := '0';
+    signal sti_ok_s   : std_logic := '0';
+    signal err_s      : std_logic := '0';
 
     -- Path for reference values
     constant txt_path : string := "/run/media/leemarc/Shared/Switchdrive/Private/Documents/Master/2_S2/LPSC/Mandelbrot/lpsc-mandelbrot/sim_zc/";
