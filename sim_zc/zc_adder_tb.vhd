@@ -26,7 +26,7 @@ use std.textio.all;
 
 entity zc_adder_tb is
     generic (
-        FIXEDPOINT  : integer := 14;
+        FIXEDPOINT  : integer := 10;
         SIZE        : integer := 18;
         R_SQ        : integer := 4
     );
@@ -131,6 +131,7 @@ begin
         variable z_imag_sti   : std_logic_vector(SIZE - 1 downto 0);
 
     begin
+        sti_ok_s <= '0';
       -- expression doesn't work with only file name
         file_open(sti_file, txt_path & "sti.txt", READ_MODE);
         --file_open(sti_file, "sti.txt", READ_MODE);
@@ -149,6 +150,8 @@ begin
         wait for 2*PERIOD;
 
         while not endfile(sti_file) loop
+            sti_ok_s <= '0';
+            wait until rising_edge(clk_s);
             -- read txt line into variable
             readline(sti_file, txt_line);
 
@@ -162,11 +165,10 @@ begin
             sti.c_imag    <= c_imag_sti;
             sti.z_real_in <= z_real_sti;
             sti.z_imag_in <= z_imag_sti;
-
-            wait until falling_edge(clk_s);
-            wait for 2 ns;
             -- signal new stimulus in
             sti_ok_s <= '1';
+
+            wait until falling_edge(clk_s);
 
         end loop;
 
@@ -192,8 +194,6 @@ begin
         file_open(ref_file, txt_path & "ref.txt", READ_MODE);
         --file_open(ref_file, "ref.txt", READ_MODE);
 
-        -- wait for new stimulus
-        wait until sti_ok_s = '1';
 
         while not endfile(ref_file) loop
             -- read txt line into variable
@@ -204,24 +204,30 @@ begin
             read(txt_line, z_imag_ref);
             read(txt_line, z_over_r_ref);
 
+
+             err_s <= '0';
+            -- wait for new stimulus
+            wait until sti_ok_s = '1';
             -- Assign to reference signals
             ref.z_real_o    <= z_real_ref;
             ref.z_imag_o    <= z_imag_ref;
             ref.z_over_r_o  <= z_over_r_ref;
-
+            wait for 2 ns;
             -- Check observed signal is the same as reference output
-            if obs.z_real_o     = ref.z_real_o      and
-               obs.z_imag_o     = ref.z_imag_o      and
+            if obs.z_real_o   = ref.z_real_o      and
+               obs.z_imag_o   = ref.z_imag_o      and
                obs.z_over_r_o = ref.z_over_r_o  then
+                report "OK" severity warning;
+            else
                 err_s <= '1';
                 report "Error" severity error;
-            else
-                report "OK" severity warning;
             end if;
 
 
-            wait until rising_edge(clk_s);
-            wait for 2 ns;
+            -- wait for new stimulus
+            wait until sti_ok_s = '0';
+            --wait until rising_edge(clk_s);
+            --wait for 2 ns;
 
         end loop;
         wait;
