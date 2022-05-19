@@ -75,9 +75,10 @@ architecture seq of iterator is
     type state_type is (INIT,ITER,MEM_WRITE);
     signal state_s : state_type;
 
+    constant max_cnt_val : integer := MAX_ITER-1;
     -- Z output from zc_adder
-    signal z_real_s       : std_logic_vector(DSP_WIDTH-1 downto 0);
-    signal z_imag_s       : std_logic_vector(DSP_WIDTH-1 downto 0);
+    --signal z_real_s       : std_logic_vector(DSP_WIDTH-1 downto 0);
+    --signal z_imag_s       : std_logic_vector(DSP_WIDTH-1 downto 0);
     signal z_greater_r_s  : std_logic;
 
 
@@ -91,6 +92,9 @@ architecture seq of iterator is
     -- XY coordinate registers
     signal x_reg_s : std_logic_vector(COORD_WIDTH-1 downto 0);
     signal y_reg_s : std_logic_vector(COORD_WIDTH-1 downto 0);
+    -- Z registers
+    signal z_real_reg_s : std_logic_vector(DSP_WIDTH-1 downto 0);
+    signal z_imag_reg_s : std_logic_vector(DSP_WIDTH-1 downto 0);
 
     -- Iteration counter (register)
     signal iter_cnt_s   : natural range 0 to MAX_ITER; -- TODO check synthesis
@@ -101,7 +105,7 @@ architecture seq of iterator is
 
 
 begin
-    nextval_o  <= nextval_s;
+    nextval_o  <= nextval_s; -- todo replace with we if it works
 
 
     adder : zc_adder
@@ -111,12 +115,12 @@ begin
         R_SQ => R_SQ
     )
     port map(
-        z_real_i      => z_next_real_s,
-        z_imag_i      => z_next_imag_s,
+        z_real_i      => z_real_reg_s,
+        z_imag_i      => z_imag_reg_s,
         c_real_i      => c_next_real_s,
         c_imag_i      => c_next_imag_s,
-        z_next_real_o => z_real_s,
-        z_next_imag_o => z_imag_s,
+        z_next_real_o => z_next_real_s,
+        z_next_imag_o => z_next_imag_s,
         z_greater_r_o => z_greater_r_s
     );
 
@@ -132,12 +136,12 @@ begin
 
           when ITER =>
             -- On divergence or max iterations
-            if (z_greater_r_s = '1') or (iter_cnt_s = MAX_ITER) then
+            if (z_greater_r_s = '1') or (iter_cnt_s = max_cnt_val) then
               state_s <= MEM_WRITE;
             end if;
 
           when MEM_WRITE =>
-            -- Geto back to iterating
+            -- Get back to iterating
             state_s <= ITER;
           when others =>
             state_s <= INIT;
@@ -145,25 +149,26 @@ begin
       end if;
     end process state;
 
-    output_decode: process(all)
+    output_decode: process(clk_i,rst_i)
     begin
-      nextval_s <= '0';
-      z_next_real_s <= (others => '0');
-      z_next_imag_s <= (others => '0');
-      addr_o <= (others => '0');
-      data_o <= (others => '0');
-      we_o   <= '0';
-      cnt_incr_s <= '0';
+      nextval_s     <= '0';
+      --z_next_real_s <= (others => '0');
+      --z_next_imag_s <= (others => '0');
+      addr_o        <= (others => '0');
+      data_o        <= (others => '0');
+      we_o          <= '0';
+      cnt_incr_s    <= '0';
 
       case state_s is
         when INIT =>
           -- default outputs
+          nextval_s <= '1';
 
         when ITER =>
           -- loop back z-values to zc_adder
-          z_next_real_s <= z_real_s;
-          z_next_imag_s <= z_imag_s;
-          cnt_incr_s <= '1';
+          --z_real_s <= z_next_real_s;
+          --z_imag_s <= z_next_imag_s; -- TODO add registers
+          cnt_incr_s    <= '1';
 
         when MEM_WRITE =>
           -- load next values from coord generator
@@ -188,6 +193,8 @@ begin
         c_next_imag_s <= (others=>'0');
         x_reg_s       <= (others=>'0');
         y_reg_s       <= (others=>'0');
+        z_real_reg_s  <= (others=>'0');
+        z_imag_reg_s  <= (others=>'0');
         iter_cnt_s    <= 0;
       elsif(rising_edge(clk_i)) then
         if nextval_s = '1' then -- Load from inputs -> start sequence
@@ -196,9 +203,13 @@ begin
           x_reg_s       <= x_i;
           y_reg_s       <= y_i;
           iter_cnt_s    <= 0; -- reset counter on register load
+          z_real_reg_s  <= (others=>'0');
+          z_imag_reg_s  <= (others=>'0');
         elsif cnt_incr_s = '1' then
           iter_cnt_s    <= iter_cnt_s + 1; -- TODO check syntax and synthesis
           -- keep C and XY-values
+          z_real_reg_s  <= z_next_real_s;
+          z_imag_reg_s  <= z_next_imag_s;
         else -- hold
           -- keep values, do nothing
         end if;

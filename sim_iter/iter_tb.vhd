@@ -26,12 +26,12 @@ use std.textio.all;
 
 entity iter_adder_tb is
     generic (
-        FIXEDPOINT  : integer := 14;
+        FIXEDPOINT  : integer := 12;
         SIZE        : integer := 18;
         R_SQ        : integer := 4;
         MAX_ITER    : integer := 100;
-        COORD_WIDTH : integer := 8;
-        MEM_WIDTH   : integer := 8
+        COORD_WIDTH : integer := 10;
+        MEM_WIDTH   : integer := 9
     );
 end iter_adder_tb;
 
@@ -165,38 +165,48 @@ begin
         sti.y       <= (others => '0');
 
         -- Reset input for 3 periods
-        wait until rising_edge(clk_s);
+        --wait until rising_edge(clk_s);
         reset_s <= '1';
         wait for 3*PERIOD;
-
         reset_s <= '0';
-        wait for 2*PERIOD;
+
+
 
         while not endfile(sti_file) loop
-            -- read txt line into variable
-            readline(sti_file, txt_line);
+            --if nextval_s = '1' then
+              -- read txt line into variable
+              readline(sti_file, txt_line);
 
-            -- read txt column into variable (space-separated)
-            read(txt_line, c_real_sti);
-            read(txt_line, c_imag_sti);
-            read(txt_line, x_sti);
-            read(txt_line, y_sti);
+              -- read txt column into variable (space-separated)
+              read(txt_line, c_real_sti);
+              read(txt_line, c_imag_sti);
+              read(txt_line, x_sti);
+              read(txt_line, y_sti);
 
-            sti.c_real  <= c_real_sti;
-            sti.c_imag  <= c_imag_sti;
-            sti.x       <= x_sti;
-            sti.y       <= y_sti;
+              sti.c_real  <= c_real_sti;
+              sti.c_imag  <= c_imag_sti;
+              sti.x       <= x_sti;
+              sti.y       <= y_sti;
 
-            wait until falling_edge(clk_s);
-            wait for 2 ns;
-            -- signal new stimulus in
-            sti_ok_s <= '1';
+              -- signal new stimulus in
+              sti_ok_s <= '1';
+              wait for 2 ns;
+              sti_ok_s <= '0';
+              wait until nextval_s = '0';
+              wait until nextval_s = '1';
+              --wait until falling_edge(clk_s);
+            --end if;
+
 
         end loop;
 
         -- close file
         file_close(sti_file);
-
+        --wait for PERIOD*2;
+        --wait for 2 ns;
+        --wait until nextval_s = '1';
+        wait for PERIOD;
+        --wait until nextval_s = '1';
         -- end of simulation
         sim_over_s <= true;
 
@@ -216,8 +226,7 @@ begin
         file_open(ref_file, txt_path & "ref.txt", READ_MODE);
         --file_open(ref_file, "ref.txt", READ_MODE);
 
-        -- wait for new stimulus
-        wait until sti_ok_s = '1';
+
 
         while not endfile(ref_file) loop
             -- read txt line into variable
@@ -226,25 +235,32 @@ begin
             -- read txt column into variable (space-separated)
             read(txt_line, addr_ref);
             read(txt_line, data_ref);
+            read(txt_line, we_ref);
+            -- wait for new stimulus
+            wait until sti_ok_s = '1';
+            wait for PERIOD;
 
             -- Assign to reference signals
             ref.addr    <= addr_ref;
             ref.data    <= data_ref;
-            --ref.z_over_r_o  <= z_over_r_ref;
-
+            ref.we      <= we_ref;
+            wait until nextval_s = '1'; -- wait for write enable output
             -- Check observed signal is the same as reference output
             if obs.addr     = ref.addr      and
-               obs.data     = ref.data      then
+               obs.data     = ref.data      and
+               obs.we       = ref.we then
                 err_s <= '0';
                 report "OK" severity warning;
             else
                 err_s <= '1';
                 report "Error" severity error;
+                wait for 2 ns;
+                err_s <= '0';
             end if;
 
 
-            wait until rising_edge(clk_s);
-            wait for 2 ns;
+            --wait until rising_edge(clk_s);
+            --wait for 2 ns;
 
         end loop;
         wait;

@@ -135,6 +135,7 @@ begin
       -- Signal init
       z_greater_r_o <= '0';
       -- only compare integer part of z_rsq_s
+      -- converges if MAX_ITER is reached
       if to_integer(z_rsq_s(SIZE-1 downto FIXEDPOINT)) >= R_SQ then
         z_greater_r_o <= '1';
       end if;
