@@ -407,8 +407,12 @@ architecture arch of lpsc_mandelbrot_firmware is
         constant MAX_ITER       : integer := 100;
         constant N_DECIMALS     : integer := 14;
 
-        constant C_TOP_LEFT_IM  : std_logic_vector(DSP_WIDTH-1 downto 0) := (DSP_WIDTH-1 downto DSP_WIDTH-3=>"111", others=>'0');
-        constant C_TOP_LEFT_RE  : std_logic_vector(DSP_WIDTH-1 downto 0) := (DSP_WIDTH-4=>'1', others=>'0');
+        constant C_TOP_LEFT_IM  : std_logic_vector(DSP_WIDTH-1 downto 0) :=
+        "000100000000000000";
+        --(DSP_WIDTH-1 downto DSP_WIDTH-3=>"111", others=>'0');
+        constant C_TOP_LEFT_RE  : std_logic_vector(DSP_WIDTH-1 downto 0) :=
+        "111000000000000000";
+        --(DSP_WIDTH-4=>'1', others=>'0');
         constant C_INC_RE       : std_logic_vector(DSP_WIDTH-1 downto 0) := "000000000000110000";
         constant C_INC_IM       : std_logic_vector(DSP_WIDTH-1 downto 0) := "000000000000110111"; -- from resume_arch_mandel.pdf
 
@@ -419,6 +423,7 @@ architecture arch of lpsc_mandelbrot_firmware is
         signal ycoord_s  : std_logic_vector((C_SCREEN_RES - 1) downto 0);
         signal nextval_s : std_logic;
         signal we_s      : std_logic;
+        signal data_s    : std_logic_vector(MEM_WIDTH-1 downto 0);
 
 
         signal ClkSys100MhzBufgxC : std_logic                                    := '0';
@@ -538,23 +543,30 @@ architecture arch of lpsc_mandelbrot_firmware is
 
              -- Memory control signals
              addr_o => BramVideoMemoryWriteAddrxD,
-             data_o => BramVideoMemoryWriteDataxD,
+             data_o => data_s,--BramVideoMemoryWriteDataxD,
              we_o   => we_s
          );
+
+
+         -- Supposing RGB 3-3-3
+         -- unsigned to RGB B/W
+         --BramVideoMemoryWriteDataxD <= data_s(2 downto 0) & data_s(2 downto 0) & data_s(2 downto 0);
+         BramVideoMemoryWriteDataxD <= data_s;
+
          ila_iter : ila_0
          PORT MAP (
-         	clk => ClkMandelxC,
+          clk => ClkSys100MhzxCI,--ClkMandelxC,
 
 
 
-         	probe0 => BramVideoMemoryWriteAddrxD, -- iter:addr_o
-         	probe1 => BramVideoMemoryWriteDataxD, -- iter:data_o
-         	probe2(0) => nextval_s, -- iter:nextval
-         	probe3(0) => we_s, -- iter:we
-         	probe4 => xcoord_s, -- iter:xscreen
-         	probe5 => ycoord_s, -- iter:yscreen
-         	probe6 => c_real_s, -- iter:c_real_i
-         	probe7 => c_imag_s  -- iter:c_imag_i
+          probe0 => BramVideoMemoryWriteAddrxD, -- iter:addr_o
+          probe1 => BramVideoMemoryWriteDataxD, -- iter:data_o
+          probe2(0) => nextval_s, -- iter:nextval
+          probe3(0) => we_s, -- iter:we
+          probe4 => xcoord_s, -- iter:xscreen
+          probe5 => ycoord_s, -- iter:yscreen
+          probe6 => c_real_s, -- iter:c_real_i
+          probe7 => c_imag_s  -- iter:c_imag_i
          );
     end block FpgaUserCDxB;
 

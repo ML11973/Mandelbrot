@@ -98,6 +98,7 @@ architecture seq of iterator is
 
     -- Iteration counter (register)
     signal iter_cnt_s   : natural range 0 to MAX_ITER; -- TODO check synthesis
+    signal z_greater_r_reg_s : std_logic;
 
     -- Control signals
     signal cnt_incr_s   : std_logic;
@@ -175,7 +176,8 @@ begin
           nextval_s <= '1';
           -- write current iterations to memory
           addr_o <= y_reg_s & x_reg_s;
-          data_o <= std_logic_vector(to_unsigned(iter_cnt_s,data_o'length));
+          --data_o <= std_logic_vector(to_unsigned(iter_cnt_s,data_o'length));
+          data_o <= (others=>'0') when z_greater_r_reg_s else (others=>'1');
           we_o   <= '1';
 
         when others =>
@@ -196,7 +198,10 @@ begin
         z_real_reg_s  <= (others=>'0');
         z_imag_reg_s  <= (others=>'0');
         iter_cnt_s    <= 0;
+        z_greater_r_reg_s <= '0';
       elsif(rising_edge(clk_i)) then
+
+        z_greater_r_reg_s <= z_greater_r_s;
         if nextval_s = '1' then -- Load from inputs -> start sequence
           c_next_real_s <= c_real_i;
           c_next_imag_s <= c_imag_i;
