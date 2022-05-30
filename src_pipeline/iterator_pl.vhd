@@ -23,54 +23,32 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--library iter_pl;
+--use iter_pl.iter_pl_pkg.all;
+library xil_defaultlib;
+use xil_defaultlib.iter_pl_pkg.all;
 
-entity iterator is
+entity iterator_pl is
     generic (
         R_SQ          : integer := 4;
         DSP_WIDTH     : integer := 18;
         N_DECIMALS    : integer := 14;
         MAX_ITER      : integer := 100;
         COORD_WIDTH   : integer := 16;
-        MEM_WIDTH     : integer := 8
+        MEM_WIDTH     : integer := 8;
+        ITERATOR_ID   : std_logic := '0'
     );
     port (
         clk_i     : in std_logic;
         rst_i     : in std_logic;
 
-        -- Feed from coordinate generator
-        c_real_i  : in std_logic_vector(DSP_WIDTH  -1 downto 0);
-        c_imag_i  : in std_logic_vector(DSP_WIDTH  -1 downto 0);
-        x_i       : in std_logic_vector(COORD_WIDTH-1 downto 0);
-        y_i       : in std_logic_vector(COORD_WIDTH-1 downto 0);
-
-        -- Control signals
-        nextval_o : out std_logic;
-
-        -- Memory control signals
-        addr_o : out std_logic_vector(2*COORD_WIDTH-1 downto 0);
-        data_o : out std_logic_vector(MEM_WIDTH-1 downto 0);
-        we_o   : out std_logic
+        -- Inputs
+        iter_i    : in iterator_inputs_t;
+        -- Outpus
+        iter_o    : out iterator_outputs_t
     );
-end iterator;
-architecture seq of iterator is
-
-    -- Component declarations
-    component zc_adder
-      generic (
-          SIZE : integer := 18;
-          FIXEDPOINT : integer := 4;
-          R_SQ : integer := 4
-      );
-      port (
-          z_real_i      : in  std_logic_vector(SIZE-1 downto 0);
-          z_imag_i      : in  std_logic_vector(SIZE-1 downto 0);
-          c_real_i      : in  std_logic_vector(SIZE-1 downto 0);
-          c_imag_i      : in  std_logic_vector(SIZE-1 downto 0);
-          z_next_real_o : out std_logic_vector(SIZE-1 downto 0);
-          z_next_imag_o : out std_logic_vector(SIZE-1 downto 0);
-          z_greater_r_o : out std_logic
-      );
-    end component;
+end iterator_pl;
+architecture seq of iterator_pl is
 
     type state_type is (INIT,ITER,MEM_WRITE);
     signal state_s : state_type;
@@ -106,24 +84,17 @@ architecture seq of iterator is
 
 
 begin
-    nextval_o  <= nextval_s; -- todo replace with we if it works
+    iter_o.nextval  <= nextval_s; -- todo replace with we if it works
 
+    -- Former adder skeleton
+    iter_o.zc.z_real <= z_real_reg_s;
+    iter_o.zc.z_imag <= z_real_reg_s;
+    iter_o.zc.c_real <= c_next_real_s;
+    iter_o.zc.c_imag <= c_next_imag_s;
+    z_next_real_s <= iter_i.zc.z_next_real;
+    z_next_imag_s <= iter_i.zc.z_next_imag;
+    z_greater_r_s <= iter_i.zc.z_greater_r;
 
-    adder : zc_adder
-    generic map(
-        SIZE => DSP_WIDTH,
-        FIXEDPOINT => N_DECIMALS,
-        R_SQ => R_SQ
-    )
-    port map(
-        z_real_i      => z_real_reg_s,
-        z_imag_i      => z_imag_reg_s,
-        c_real_i      => c_next_real_s,
-        c_imag_i      => c_next_imag_s,
-        z_next_real_o => z_next_real_s,
-        z_next_imag_o => z_next_imag_s,
-        z_greater_r_o => z_greater_r_s
-    );
 
     -- State selection process
     state : process(clk_i, rst_i)
@@ -131,58 +102,63 @@ begin
       if rst_i = '1' then
         state_s <= INIT;
       elsif rising_edge(clk_i) then
-        case state_s is
-          when INIT =>
-            state_s <= ITER;
+        if iter_i.zc.addr_pl = ITERATOR_ID then
+          case state_s is
+            when INIT =>
+              state_s <= ITER;
 
-          when ITER =>
-            -- On divergence or max iterations
-            if (z_greater_r_s = '1') or (iter_cnt_s = max_cnt_val) then
-              state_s <= MEM_WRITE;
-            end if;
+            when ITER =>
+              -- On divergence or max iterations
+              if (z_greater_r_s = '1') or (iter_cnt_s = max_cnt_val) then
+                state_s <= MEM_WRITE;
+              end if;
 
-          when MEM_WRITE =>
-            -- Get back to iterating
-            state_s <= ITER;
-          when others =>
-            state_s <= INIT;
-        end case;
+            when MEM_WRITE =>
+              -- Get back to iterating
+              state_s <= ITER;
+            when others =>
+              state_s <= INIT;
+          end case;
+        end if;
       end if;
     end process state;
 
     output_decode: process(clk_i,rst_i)
     begin
       nextval_s     <= '0';
-      --z_next_real_s <= (others => '0');
-      --z_next_imag_s <= (others => '0');
-      addr_o        <= (others => '0');
-      data_o        <= (others => '0');
-      we_o          <= '0';
+      iter_o.mem.addr        <= (others => '0');
+      iter_o.mem.data        <= (others => '0');
+      iter_o.mem.we          <= '0';
       cnt_incr_s    <= '0';
+      -- Signals iterator has not been active on this cycle
+      iter_o.zc.addr_pl <= not ITERATOR_ID;
 
-      case state_s is
-        when INIT =>
+      if iter_i.zc.addr_pl = ITERATOR_ID then
+        iter_o.zc.addr_pl <= ITERATOR_ID;
+        case state_s is
+          when INIT =>
+            -- default outputs
+            nextval_s <= '1';
+
+          when ITER =>
+            -- loop back z-values to zc_adder
+            --z_real_s <= z_next_real_s;
+            --z_imag_s <= z_next_imag_s; -- TODO add registers
+            cnt_incr_s    <= '1';
+
+          when MEM_WRITE =>
+            -- load next values from coord generator
+            nextval_s <= '1';
+            -- write current iterations to memory
+            iter_o.mem.addr <= y_reg_s & x_reg_s;
+            iter_o.mem.data <= std_logic_vector(to_unsigned(iter_cnt_s,iter_o.mem.data'length));
+            --iter_o.mem.data <= (others=>'0') when z_greater_r_reg_s else (others=>'1');
+            iter_o.mem.we   <= '1';
+
+          when others =>
           -- default outputs
-          nextval_s <= '1';
-
-        when ITER =>
-          -- loop back z-values to zc_adder
-          --z_real_s <= z_next_real_s;
-          --z_imag_s <= z_next_imag_s; -- TODO add registers
-          cnt_incr_s    <= '1';
-
-        when MEM_WRITE =>
-          -- load next values from coord generator
-          nextval_s <= '1';
-          -- write current iterations to memory
-          addr_o <= y_reg_s & x_reg_s;
-          --data_o <= std_logic_vector(to_unsigned(iter_cnt_s,data_o'length));
-          data_o <= (others=>'0') when z_greater_r_reg_s else (others=>'1');
-          we_o   <= '1';
-
-        when others =>
-        -- default outputs
-      end case;
+        end case;
+      end if;
     end process output_decode;
 
 
@@ -203,10 +179,10 @@ begin
           iter_cnt_s    <= 0;
           z_greater_r_reg_s <= '0';
         elsif nextval_s = '1' then -- Load from inputs -> start sequence
-          c_next_real_s <= c_real_i;
-          c_next_imag_s <= c_imag_i;
-          x_reg_s       <= x_i;
-          y_reg_s       <= y_i;
+          c_next_real_s <= iter_i.cv.c_real;
+          c_next_imag_s <= iter_i.cv.c_imag;
+          x_reg_s       <= iter_i.cv.x;
+          y_reg_s       <= iter_i.cv.y;
           iter_cnt_s    <= 0; -- reset counter on register load
           z_real_reg_s  <= (others=>'0');
           z_imag_reg_s  <= (others=>'0');

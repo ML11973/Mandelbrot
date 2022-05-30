@@ -1,0 +1,16 @@
+{signal: [
+  {name: 'clk', 		wave: 'p..........'},
+  {name: 'index', 		wave: '01010101010'},
+  {name: 'nextval',		wave: '01.0.10.10.'},
+  {name: 'c_cgen',		wave: '0.230.40.50', data: ['cin0','cin1','cin2','cin3']},
+  {name: 'xy_cgen',		wave: '0.230.40.50', data: ['xyin0','xyin1','xyin2','xyin3']},
+  {name: 'z1_real', 	wave: '0..23234345', data: ['zin0','zin1','zin0','zin1','zin2','zin1','zin2','zin3']},
+  {name: 'c1_real', 	wave: '0..23234345', data: ['cin0','cin1','cin0','cin1','zin2','cin1','cin2','cin3']},
+  {name: 'xy1', 		wave: '0..23234345', data: ['xyin0','xyin1','xyin0','xyin1','xyin2','xyin1','xyin2','xyin3']},
+  {name: 'n1', 			wave: '0..23234345', data: ['0', '0','1','1','0','2','1','0','2','1']},
+  {name: 'index1', 		wave: '10101010101'},
+  {name: 'z_over_r', 	wave: '0....10.10.'},
+  {name: 'addr',		wave: '0....20.30.', data: ['xy0','xy1','xy2','xy3']},
+  {name: 'data', 		wave: '0....20.30.', data: ['d0','d1','d2','d3']},
+  {name: 'we', 			wave: '0....10.10.'}
+]}
