@@ -49,6 +49,8 @@ entity zc_adder_pl is
         mem_o     : out mem_t
     );
 end zc_adder_pl;
+--attribute use_dsp : string;
+--attribute use_dsp of seq: architecture is "yes";
 architecture seq of zc_adder_pl is
     -- Pipeline input stage (combinatory)
     signal coords_s0 : coords_t;

@@ -216,26 +216,26 @@ architecture arch of lpsc_mandelbrot_firmware_pl is
      end component;
 
 
-     COMPONENT ila_0
+     --COMPONENT ila_0
 
-     PORT (
-     	clk : IN STD_LOGIC;
+     --PORT (
+     --	clk : IN STD_LOGIC;
 
 
 
-     	probe0 : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
-     	probe1 : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
-     	probe2 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-     	probe3 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-     	probe4 : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-     	probe5 : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-     	probe6 : IN STD_LOGIC_VECTOR(17 DOWNTO 0);
-     	probe7 : IN STD_LOGIC_VECTOR(17 DOWNTO 0);
-     	probe8 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-     	probe9 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-     	probe10 : IN STD_LOGIC_VECTOR(0 DOWNTO 0)
-     );
-     END COMPONENT;
+     --	probe0 : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+     --	probe1 : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
+     --	probe2 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+     --	probe3 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+     --	probe4 : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+     --	probe5 : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+     --	probe6 : IN STD_LOGIC_VECTOR(17 DOWNTO 0);
+     --	probe7 : IN STD_LOGIC_VECTOR(17 DOWNTO 0);
+     --	probe8 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+     --	probe9 : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+     --	probe10 : IN STD_LOGIC_VECTOR(0 DOWNTO 0)
+     --);
+     --END COMPONENT;
 
     -- Signals
 
@@ -506,24 +506,24 @@ architecture arch of lpsc_mandelbrot_firmware_pl is
 
 
 
-         ila_iter : ila_0
-         PORT MAP (
-          clk => ClkSys100MhzxCI,--ClkMandelxC,
+         --ila_iter : ila_0
+         --PORT MAP (
+          --clk => ClkSys100MhzxCI,--ClkMandelxC,
 
 
 
-          probe0 => BramVideoMemoryWriteAddrxD, -- iter:addr_o
-          probe1 => BramVideoMemoryWriteDataxD, -- iter:data_o
-          probe2(0) => mem_s.we, -- iter:nextval
-          probe3(0) => mem_s.we, -- free
-          probe4 => xcoord_s, -- iter:xscreen
-          probe5 => ycoord_s, -- iter:yscreen
-          probe6 => c_real_s, -- iter:c_real_i
-          probe7 => c_imag_s,  -- iter:c_imag_i
-          probe8(0) => mem_s.we, -- free
-          probe9(0) => mem_s.we, -- free
-          probe10(0) => mem_s.we -- free
-         );
+        --  probe0 => BramVideoMemoryWriteAddrxD, -- iter:addr_o
+        --  probe1 => BramVideoMemoryWriteDataxD, -- iter:data_o
+        --  probe2(0) => mem_s.we, -- iter:nextval
+        --  probe3(0) => mem_s.we, -- free
+        --  probe4 => xcoord_s, -- iter:xscreen
+        --  probe5 => ycoord_s, -- iter:yscreen
+        --  probe6 => c_real_s, -- iter:c_real_i
+        --  probe7 => c_imag_s,  -- iter:c_imag_i
+        --  probe8(0) => mem_s.we, -- free
+        --  probe9(0) => mem_s.we, -- free
+        --  probe10(0) => mem_s.we -- free
+         --);
     end block FpgaUserCDxB;
 
 
